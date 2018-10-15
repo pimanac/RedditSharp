@@ -7,9 +7,22 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace RedditSharp
 {
+    interface IListing<T> : IAsyncEnumerable<T> where T : RedditObject
+    {
+        int LimitPerRequest { get; set; }
+        int MaximumLimit { get; set; }
+        bool IsStream { get; set; }
+    }
+
+    interface IListingStream<T> : IObservable<T> where T : RedditObject
+    {
+        
+    }
+
     /// <summary>
     /// Method to sort by (e.g. relevance, new)
     /// </summary>
@@ -37,7 +50,7 @@ namespace RedditSharp
     /// A semi-realtime stream of <see cref="Thing"/> being posted to an item.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ListingStream<T> : IObservable<T> where T : Thing
+    public class ListingStream<T> : IListingStream<T> where T : RedditObject
     {
 
         Listing<T> Listing { get; set; }
@@ -102,8 +115,11 @@ namespace RedditSharp
     /// A reddit listing.  https://github.com/reddit/reddit/wiki/JSON#listing
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Listing<T> : RedditObject, IAsyncEnumerable<T> where T : Thing
+    public class Listing<T> : IListing<T> where T: RedditObject
     {
+        [JsonIgnore]
+        public IWebAgent WebAgent { get; }
+
         /// <summary>
         /// Gets the default number of listings returned per request
         /// </summary>
@@ -118,8 +134,9 @@ namespace RedditSharp
         /// <param name="url">Endpoint</param>
         /// <param name="maxLimit">Maximum number of records to retrieve from reddit.</param>
         /// <param name="limitPerRequest">Maximum number of records to return per request.  This number is endpoint specific.</param>
-        internal Listing(IWebAgent agent, string url, int maxLimit = -1, int limitPerRequest = -1) : base(agent)
+        internal Listing(IWebAgent agent, string url, int maxLimit = -1, int limitPerRequest = -1)
         {
+            WebAgent = agent;
             LimitPerRequest = limitPerRequest;
             MaximumLimit = maxLimit;
             IsStream = false;
@@ -157,7 +174,7 @@ namespace RedditSharp
         /// <summary>
         /// Returns true is this a ListingStream.
         /// </summary>
-        internal bool IsStream { get; set; }
+        public bool IsStream { get; set; }
 
         /// <summary>
         /// Returns an enumerator that iterates through a collection, using the specified number of listings per
@@ -169,7 +186,7 @@ namespace RedditSharp
         /// <returns></returns>
         public IAsyncEnumerator<T> GetEnumerator(int limitPerRequest, int maximumLimit = -1, bool stream = false)
         {
-            return new ListingEnumerator(this, limitPerRequest, maximumLimit, stream);
+            return new ListingEnumerator<T>(this, limitPerRequest, maximumLimit, stream);
         }
 
         /// <inheritdoc/>
@@ -188,7 +205,7 @@ namespace RedditSharp
         }
 
 #pragma warning disable 0693
-        private class ListingEnumerator : IAsyncEnumerator<T>
+        private class ListingEnumerator<T> : IAsyncEnumerator<T> where T : RedditObject
         {
             private bool stream = false;
             private Listing<T> Listing { get; set; }
@@ -317,7 +334,7 @@ namespace RedditSharp
                 {
                     if (!stream)
                     {
-                        things.Add(Thing.Parse<T>(Listing.WebAgent, children[i]));
+                        things.Add(RedditObject.Parse<T>(Listing.WebAgent, children[i]));
                     }
                     else
                     {
@@ -336,7 +353,7 @@ namespace RedditSharp
                                     continue;
                                 }
 
-                                things.Add(Thing.Parse<T>(Listing.WebAgent, reply));
+                                things.Add(RedditObject.Parse<T>(Listing.WebAgent, reply));
                                 done.Add(replyId);
                             }
                         }
@@ -346,7 +363,7 @@ namespace RedditSharp
                             continue;
                         }
 
-                        things.Add(Thing.Parse<T>(Listing.WebAgent, children[i]));
+                        things.Add(RedditObject.Parse<T>(Listing.WebAgent, children[i]));
                         done.Add(id);
                     }
                 }
@@ -384,41 +401,41 @@ namespace RedditSharp
 
             private async Task<bool> MoveNextBackAsync(CancellationToken cancellationToken)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (CurrentIndex == -1)
-                {
-                    //first call, get a page and set CurrentIndex
-                    await FetchNextPageAsync().ConfigureAwait(false);
-                    CurrentIndex = 0;
-                    return CurrentPage.Count > 0; //if there are no results, return false
-                }
-                else
-                {
-                    Count++;
-                    CurrentIndex++;
-                }
-                //I don't think we want to use Count here. Look into this.
-                if (MaximumLimit != -1 && Count >= MaximumLimit)
-                {
-                    // Maximum listing count returned
-                    return false;
-                }
-                if (CurrentIndex >= CurrentPage.Count)
-                {
-                    if (After == null)
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (CurrentIndex == -1)
                     {
-                        // No more pages to return
-                        return false;
-                    }
-                    else
-                    {
+                        //first call, get a page and set CurrentIndex
                         await FetchNextPageAsync().ConfigureAwait(false);
                         CurrentIndex = 0;
                         return CurrentPage.Count > 0; //if there are no results, return false
                     }
-                }
+                    else
+                    {
+                        Count++;
+                        CurrentIndex++;
+                    }
+                    //I don't think we want to use Count here. Look into this.
+                    if (MaximumLimit != -1 && Count >= MaximumLimit)
+                    {
+                        // Maximum listing count returned
+                        return false;
+                    }
+                    if (CurrentIndex >= CurrentPage.Count)
+                    {
+                        if (After == null)
+                        {
+                            // No more pages to return
+                            return false;
+                        }
+                        else
+                        {
+                            await FetchNextPageAsync().ConfigureAwait(false);
+                            CurrentIndex = 0;
+                            return CurrentPage.Count > 0; //if there are no results, return false
+                        }
+                    }
 
-                return true;
+                    return true;
             }
 
             private async Task<bool> MoveNextForwardAsync(CancellationToken cancellationToken)
@@ -484,6 +501,8 @@ namespace RedditSharp
                 await Task.Delay(seconds * 1000, cancellationToken).ConfigureAwait(false);
             }
         }
-#pragma warning restore
+
+        
+        #pragma warning restore
     }
 }

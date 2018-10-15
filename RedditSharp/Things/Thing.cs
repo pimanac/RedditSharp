@@ -163,6 +163,10 @@ namespace RedditSharp.Things
                 {
                     result = new LiveUpdateEvent(agent, json);
                 }
+                else if (typeof(T) == typeof(RedditUser))
+                {
+                    result = new RedditUser(agent, json);
+                }
             }
             return result as T;
         }

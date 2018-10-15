@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using RedditSharp.Modmail;
+using RedditSharp.Modmail.Converters;
 
 namespace RedditSharp
 {
@@ -60,6 +64,8 @@ namespace RedditSharp
             RootDomain = string.IsNullOrWhiteSpace(RootDomain) ? "www.reddit.com" : RootDomain;
             DefaultRateLimiter = new RateLimitManager();
             _httpClient = new HttpClient();
+
+
         }
 
         /// <summary>
@@ -68,6 +74,7 @@ namespace RedditSharp
         public WebAgent() {
             UserAgent = DefaultUserAgent;
             RateLimiter = WebAgent.DefaultRateLimiter;
+            SetConverters();
         }
 
         /// <summary>
@@ -95,6 +102,19 @@ namespace RedditSharp
             {
                 UserAgent = userAgent;
             }
+            SetConverters();
+        }
+
+        private void SetConverters()
+        {
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings()
+            {
+                Converters = new List<JsonConverter>()
+                {
+                    new ConversationConverter(this),
+                    new ModmailUserConverter(this)
+                }
+            };
         }
 
         /// <inheritdoc />
