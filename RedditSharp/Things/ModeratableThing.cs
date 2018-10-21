@@ -67,6 +67,13 @@ namespace RedditSharp.Things
         private const string UnIgnoreReportsUrl = "/api/unignore_reports";
 
         /// <summary>
+        /// UTC date when this item was approved.
+        /// </summary>
+        [JsonConverter(typeof(UnixTimestampConverter))]
+        [JsonProperty("approved_at_utc")]
+        public DateTime? ApprovedAtUTC { get; private set; }
+
+        /// <summary>
         /// The moderator who approved this item. This will be null or empty if the item has not been approved.
         /// </summary>
         [JsonProperty("approved_by")]
@@ -138,6 +145,36 @@ namespace RedditSharp.Things
         [JsonProperty("user_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
         public ICollection<Report> UserReports { get; private set; }
+
+        /// <summary>
+        /// True if reports are ignored.  Null if not a moderator this parent subreddit.
+        /// </summary>
+        [JsonProperty("ignore_reports")]
+        public bool? IgnoreReports { get; set; }
+
+        /// <summary>
+        /// Mod note.
+        /// </summary>
+        [JsonProperty("mod_note")]
+        public string ModNote { get; set; }
+
+        /// <summary>
+        /// Mod reason.
+        /// </summary>
+        [JsonProperty("mod_reason_by")]
+        public string ModReasonBy { get; set; }
+
+        /// <summary>
+        /// Mod reason title.
+        /// </summary>
+        [JsonProperty("mod_reason_title")]
+        public string ModReasonTitle { get; set; }
+
+        /// <summary>
+        /// Removal reason
+        /// </summary>
+        [JsonProperty("removal_reason")]
+        public string RemovalReason { get; private set; }
 
         /// <summary>
         /// Reports someone

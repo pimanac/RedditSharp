@@ -34,13 +34,13 @@ namespace RedditSharp.Things
         /// Returns true if post is marked as spoiler
         /// </summary>
         [JsonProperty("spoiler")]
-        public bool IsSpoiler { get; set; }
+        public bool IsSpoiler { get; private set; }
         
         /// <summary>
         /// Returns true if this post is hidden
         /// </summary>
         [JsonProperty("hidden")]
-        public bool IsHidden { get; set; }
+        public bool IsHidden { get; private set; }
         
         /// <summary>
         /// Domain of this post.
@@ -53,6 +53,30 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("is_self")]
         public bool IsSelfPost { get; private set; }
+
+        /// <summary>
+        /// Link flair background color in hex triplet.
+        /// </summary>
+        [JsonProperty("link_flair_background_color")]
+        public string LinkFlairBackgroundColor { get; private set; }
+
+        /// <summary>
+        /// Link flair template.
+        /// </summary>
+        [JsonProperty("link_flair_template_id")]
+        public string LinkFlairTemplateId { get; private set; }
+
+        /// <summary>
+        /// Link flair text color.
+        /// </summary>
+        [JsonProperty("link_flair_text_color")]
+        public string LinkFlairTextColor { get; private set; }
+
+        /// <summary>
+        /// Link flair type.
+        /// </summary>
+        [JsonProperty("link_flair_type")]
+        public string LinkFlairType { get; private set; }
 
         /// <summary>
         /// Css class of the link flair.
@@ -109,11 +133,76 @@ namespace RedditSharp.Things
         [JsonProperty("subreddit")]
         public string SubredditName { get; private set; }
 
+        /// <summary>
+        /// Parent subreddit name.
+        /// </summary>
+        [JsonProperty("view_count")]
+        public int? ViewCount { get; private set; }
+
+        /// <summary>
+        /// Clicked
+        /// </summary>
+        [JsonProperty("clicked")]
+        public bool IsClicked { get; private set; }
+
+        /// <summary>
+        /// True if this post is set to contest mode.
+        /// </summary>
+        [JsonProperty("contest_mode")]
+        public bool IsContestMode { get; private set; }
+
+        /// <summary>
+        /// True if this post is locked.
+        /// </summary>
+        [JsonProperty("locked")]
+        public bool IsLocked { get; private set; }
 
         /// <summary>
         /// Prefix for fullname. Includes trailing underscore
         /// </summary>
-        public static string KindPrefix { get { return "t3_"; } }
+        public static string KindPrefix => "t3_";
+
+        /// <summary>
+        /// Gildings.
+        /// </summary>
+        [JsonProperty("gildings")]
+        public IDictionary<string,int> Gildings { get; private set; }
+
+        /// <summary>
+        /// True if reports are ignored.  Null if not a moderator this parent subreddit.
+        /// </summary>
+        [JsonProperty("is_crosspostable")]
+        public bool IsCrosspostable { get; set; }
+
+        /// <summary>
+        /// True if this post is marked for meta discussion.
+        /// </summary>
+        [JsonProperty("ignore_reports")]
+        public bool IsMeta { get; set; }
+
+        /// <summary>
+        /// True if this post is original content.
+        /// </summary>
+        [JsonProperty("is_original_content")]
+        public bool IsOriginalContent { get; set; }
+
+        /// <summary>
+        /// True if this post is from a reddit media domain.
+        /// </summary>
+        [JsonProperty("is_reddit_media_domain")]
+        public bool IsRedditMediaDomain { get; set; }
+
+        /// <summary>
+        /// True if this post is indexable by bots.
+        /// </summary>
+        [JsonProperty("is_robot_indexable")]
+        public bool IsRobotIndexable { get; set; }
+
+        /// <summary>
+        /// True if this post is / contains video.
+        /// </summary>
+        [JsonProperty("is_video")]
+        public bool IsVideo { get; set; }
 
         /// <summary>
         /// Post uri.
@@ -121,6 +210,86 @@ namespace RedditSharp.Things
         [JsonProperty("url")]
         [JsonConverter(typeof(UrlParser))]
         public Uri Url { get; private set; }
+
+        /// <summary>
+        /// True if score is hidden
+        /// </summary>
+        [JsonProperty("hide_score")]
+        public bool HideScore { get; private set; }
+
+        /// <summary>
+        /// Number of crossposts
+        /// </summary>
+        [JsonProperty("num_crossposts")]
+        public int? CrosspostCount { get; private set; }
+
+        /// <summary>
+        /// Whitelist status.
+        /// </summary>
+        [JsonProperty("parent_whitelist_status")]
+        public string ParentWhitelistStatus { get; private set; }
+
+        /// <summary>
+        /// Post hint.
+        /// </summary>
+        [JsonProperty("post_hint")]
+        public string PostHint { get; private set; }
+
+        /// <summary>
+        /// Post hint.
+        /// </summary>
+        [JsonProperty("previous_visits")]
+        [JsonConverter(typeof(UnixTimestampConverter))]
+        public ICollection<DateTime> PreviousVisits { get; private set; }
+
+        /// <summary>
+        /// True if this post (parent subreddit) is quarantined.
+        /// </summary>
+        [JsonProperty("is_quarantine")]
+        public bool IsQuarantine { get; private set; }
+
+        /// <summary>
+        /// Number of subscribers to the parent subreddit.
+        /// </summary>
+        [JsonProperty("subreddit_subscribers")]
+        public int SubredditSubscriberCount { get; private set; }
+
+        /// <summary>
+        /// Suggested sort of the post.
+        /// </summary>
+        [JsonProperty("suggested_sort")]
+        public Sort? SuggestedSort { get; private set; }
+
+        /// <summary>
+        /// Height of thumbnail in pixels.
+        /// </summary>
+        [JsonProperty("thumbnail_height")]
+        public int? ThumbnailHeight { get; private set; }
+
+        /// <summary>
+        /// Width of thumbnail in pixels.
+        /// </summary>
+        [JsonProperty("thumbnail_width")]
+        public int? ThumbnailWidth { get; private set; }
+
+        /// <summary>
+        /// Upvote ratio of the post.
+        /// </summary>
+        [JsonProperty("upvote_ratio")]
+        public decimal UpvoteRatio { get; private set; }
+
+        /// <summary>
+        /// Visited.
+        /// </summary>
+        [JsonProperty("visited")]
+        public bool Visited { get; private set; }
+
+        /// <summary>
+        /// Whitelist status.
+        /// </summary>
+        [JsonProperty("whitelist_status")]
+        public string WhitelistStatus { get; private set; }
+
 
         /// <summary>
         /// Returns the parent <see cref="Subreddit"/> for this post
