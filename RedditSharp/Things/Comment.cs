@@ -143,8 +143,17 @@ namespace RedditSharp.Things
         [JsonProperty("link_title")]
         public string LinkTitle { get; private set; }
 
+        /// <summary>
+        /// True if this is a new item in the indbox.
+        /// </summary>
         [JsonProperty("new")]
         public bool Unread { get; private set; }
+
+        /// <summary>
+        /// True if the comment is marked as spam.
+        /// </summary>
+        [JsonProperty("spam")]
+        public bool? IsSpam { get; private set; }
 
         /// <summary>
         /// More comments.
@@ -164,8 +173,20 @@ namespace RedditSharp.Things
         [JsonIgnore]
         public Thing Parent { get; internal set; }
 
-		/// <inheritdoc/>
-		public override string Shortlink => Permalink.ToString();
+        /// <summary>
+        /// True if comment author is submitter of parent post.
+        /// </summary>
+        [JsonProperty("is_submitter")]
+        public bool IsSubmitter { get; private set; }
+
+        /// <summary>
+        /// Subreddit display name.
+        /// </summary>
+        [JsonProperty("subreddit")]
+        public string SubredditName { get; private set; }
+
+        /// <inheritdoc/>
+        public override string Shortlink => Permalink.ToString();
 
         /// <summary>
         /// Reply to this comment.

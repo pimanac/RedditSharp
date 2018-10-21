@@ -39,16 +39,71 @@ namespace RedditSharp.Things
         private const string DelUrl = "/api/del";
 
         /// <summary>
+        /// Author flair background color (hex triplet)
+        /// </summary>
+        [JsonProperty("author_flair_background_color")]
+        public string AuthorFlairBackgroundColor { get; private set; }
+
+        /// <summary>
         /// Css flair class of the item author.
         /// </summary>
         [JsonProperty("author_flair_css_class")]
         public string AuthorFlairCssClass { get; private set; }
 
         /// <summary>
+        /// Author flair template id
+        /// </summary>
+        [JsonProperty("author_flair_template_id")]
+        public string AuthorFlairTemplateId { get; private set; }
+
+        /// <summary>
         /// Flair text of the item author.
         /// </summary>
         [JsonProperty("author_flair_text")]
         public string AuthorFlairText { get; private set; }
+
+        /// <summary>
+        /// Flair text color of the item author.
+        /// </summary>
+        [JsonProperty("author_flair_text_color")]
+        public string AuthorFlairTextColor { get; private set; }
+
+        /// <summary>
+        /// Flair type.
+        /// </summary>
+        [JsonProperty("author_flair_type")]
+        public string AuthorFlairType { get; private set; }
+
+        /// <summary>
+        /// The <see cref="RedditSharp.Things.Thing.FullName">fullname</see> of the Author.
+        /// </summary>
+        [JsonProperty("author_fullname")]
+        public string AuthorFullName { get; private set; }
+
+        /// <summary>
+        /// Returns true if the user has patreon flair.
+        /// </summary>
+        [JsonProperty("author_patreon_flair")]
+        public bool HasAuthorPatreonFlair { get; private set; }
+
+        /// <summary>
+        /// When the item was removed.
+        /// </summary>
+        [JsonProperty("banned_at_utc")]
+        [JsonConverter(typeof(UnixTimestampConverter))]
+        public DateTime? BannedAtUTC { get; private set; }
+
+        /// <summary>
+        /// Returns true if reddit gold/premium can be gifted to the author.
+        /// </summary>
+        [JsonProperty("can_guild")]
+        public bool IsGuildable { get; private set; }
+
+        /// <summary>
+        /// category - not used?
+        /// </summary>
+        [JsonProperty("category")]
+        public string Category { get; private set; }
 
         /// <summary>
         /// Number of upvotes on this item.
@@ -111,6 +166,25 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("gilded")]
         public int Gilded { get; private set; }
+
+        /// <summary>
+        /// No follow.
+        /// </summary>
+        [JsonProperty("no_follow")]
+        public bool NoFollow { get; private set; }
+
+        /// <summary>
+        /// Subreddit full name.
+        /// </summary>
+        [JsonProperty("subreddit_id")]
+        public string SubredditFullName { get; private set; }
+
+        /// <summary>
+        /// Subreddit display name.
+        /// </summary>
+        [JsonProperty("subreddit_type")]
+        public string SubredditType { get; private set; }
+
 
         /// <summary>
         /// Gets or sets the vote for the current VotableThing.
