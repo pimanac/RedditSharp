@@ -1,36 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using RedditSharp.Things;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Modmail
 {
-    /*
-     * 
-     * {
-            "isMod" : true,
-            "isAdmin" : false,
-            "name" : "foobar",
-            "isOp" : false,
-            "isParticipant" : false,
-            "isHidden" : false,
-            "id" : 123456789,
-            "isDeleted" : false
-         }, {
-            "isMod" : false,
-            "isAdmin" : false,
-            "name" : "barfoo",
-            "isOp" : true,
-            "isParticipant" : true,
-            "isHidden" : false,
-            "id" : 987654321,
-            "isDeleted" : false
-         },
-     * 
-     */
     public class Author : ModmailObject
     {
         /// <summary>
@@ -76,7 +48,7 @@ namespace RedditSharp.Modmail
         public bool IsDeleted { get; set; }
 
         /// <inheritdoc />
-        public Author(IWebAgent agent) : base(agent)
+        public Author(IWebAgent agent, JToken json) : base(agent, json)
         {
         }
     }

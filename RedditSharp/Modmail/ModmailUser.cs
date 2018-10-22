@@ -48,7 +48,7 @@ namespace RedditSharp.Modmail
         }
 
         /// <inheritdoc />
-        public ModmailUser(IWebAgent agent) : base(agent)
+        public ModmailUser(IWebAgent agent, JToken json) : base(agent, json)
         {
 
         }

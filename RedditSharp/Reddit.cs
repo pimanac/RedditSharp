@@ -1,3 +1,5 @@
+using RedditSharp.Modmail;
+using RedditSharp.Modmail.Converters;
 using RedditSharp.Search;
 using RedditSharp.Things;
 using System;
@@ -96,10 +98,29 @@ namespace RedditSharp
         public Reddit(bool useSsl)
         {
             DefaultWebAgent defaultAgent = new DefaultWebAgent();
-            
+
             DefaultWebAgent.Protocol = useSsl ? "https" : "http";
             WebAgent = defaultAgent;
             CaptchaSolver = new ConsoleCaptchaSolver();
+            SetSerializers();
+
+        }
+
+        private void SetSerializers()
+        {
+            Newtonsoft.Json.JsonConvert.DefaultSettings = () => new Newtonsoft.Json.JsonSerializerSettings
+            {
+                Converters = new System.Collections.Generic.List<Newtonsoft.Json.JsonConverter> {
+                    new ConversationConverter(WebAgent),
+                    new ModmailUserConverter(WebAgent),
+                    new AuthorConverter(WebAgent),
+                    new ModmailEntityCollectionConverter<Conversation>(),
+                    new ModmailEntityCollectionConverter<Message>(),
+                    new MessageConverter(WebAgent),
+                    new ModmailModActionConverter(WebAgent)
+                },
+                ConstructorHandling = Newtonsoft.Json.ConstructorHandling.AllowNonPublicDefaultConstructor
+            };
         }
 #pragma warning restore 1591
 
@@ -125,7 +146,9 @@ namespace RedditSharp
         {
             DefaultWebAgent.RootDomain = OAuthDomainUrl;
             WebAgent.AccessToken = accessToken;
+            SetSerializers();
             Task.Run(InitOrUpdateUserAsync);
+
         }
         /// <summary>
         /// Creates a Reddit instance with the given WebAgent implementation
@@ -133,6 +156,7 @@ namespace RedditSharp
         /// <param name="agent">Implementation of IWebAgent interface. Used to generate requests.</param>
         public Reddit(IWebAgent agent) : this(agent, false)
         {
+            SetSerializers();
         }
 
         /// <summary>
@@ -144,6 +168,7 @@ namespace RedditSharp
         {
             WebAgent = agent;
             CaptchaSolver = new ConsoleCaptchaSolver();
+            SetSerializers();
             if (initUser) Task.Run(InitOrUpdateUserAsync).Wait();
         }
 

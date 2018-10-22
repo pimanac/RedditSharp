@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Modmail.Converters
 {
@@ -11,8 +12,16 @@ namespace RedditSharp.Modmail.Converters
     {
         public IWebAgent WebAgent { get; set; }
 
-        protected ModmailObjectConverter(IWebAgent agent)
+        public ModmailObjectConverter()
         {
+            ;
+        }
+
+        public ModmailObjectConverter(IWebAgent agent)
+        {
+            if (agent == null)
+                throw new Exception("null");
+
             WebAgent = agent;
         }
     }

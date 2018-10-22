@@ -1,5 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Modmail
 {
@@ -11,17 +12,17 @@ namespace RedditSharp.Modmail
         [JsonProperty]
         public string BodyMarkdown { get; set; }
 
-        [JsonProperty]
+        [JsonProperty("author")]
         public Author Author { get; set; }
 
-        [JsonProperty]
+        [JsonProperty("isInternal")]
         public bool IsInternal { get; set; }
 
-        [JsonProperty]
+        [JsonProperty("date")]
         public DateTime Date { get; set; }
 
         /// <inheritdoc />
-        public Message(IWebAgent agent) : base(agent)
+        public Message(IWebAgent agent, JToken json) : base(agent, json)
         {
         }
     }

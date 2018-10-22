@@ -16,6 +16,8 @@ namespace RedditSharp
         int LimitPerRequest { get; set; }
         int MaximumLimit { get; set; }
         bool IsStream { get; set; }
+        IWebAgent WebAgent { get; }
+        string Url { get;  }
     }
 
     interface IListingStream<T> : IObservable<T> where T : RedditObject
@@ -125,7 +127,7 @@ namespace RedditSharp
         /// </summary>
         internal const int DefaultListingPerRequest = 25;
 
-        private string Url { get; }
+        public string Url { get; internal set; }
 
         /// <summary>
         /// Creates a new Listing instance

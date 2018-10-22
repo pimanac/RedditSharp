@@ -10,22 +10,25 @@ using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Modmail
 {
-    public class ModmailEntityCollection<T> : IDictionary where T : ModmailObject
+    public class ModmailObjectCollection<T> : IDictionary, IList where T : ModmailObject
     {
         public int Limit { get; set; }
+
+        internal IList<string> _ids;
 
         internal IDictionary<string,T> _entities;
 
         private IDictionary<string, IEnumerable<string>> _subMap;
 
-        public ModmailEntityCollection()
+        [JsonConstructor]
+        internal ModmailObjectCollection()
         {
-
+            this._ids = new List<string>();
+            this._entities = new Dictionary<string, T>();
         }
 
-        internal ModmailEntityCollection(ICollection<T> entities)
+        internal ModmailObjectCollection(ICollection<T> entities) : this()
         {
-            this._entities = new Dictionary<string, T>();
             foreach (var e in entities)
                 if (!_entities.ContainsKey(e.Id))
                     _entities.Add(e.Id, e);
@@ -41,6 +44,7 @@ namespace RedditSharp.Modmail
                 return;
 
             _entities.Add(item.Id, item);
+            _ids.Add(item.Id);
         }
 
         /// <inheritdoc />
@@ -81,20 +85,10 @@ namespace RedditSharp.Modmail
         {
             var id = (string) key;
             if (_entities.ContainsKey(id))
+            {
                 _entities.Remove(id);
-        }
-
-        /// <inheritdoc />
-        public object this[object key]
-        {
-            get => _entities[(string)key];
-            set => _entities[(string)key] = (T)value;
-        }
-
-        public T this[string key]
-        {
-            get => _entities[(string)key];
-            set => _entities[(string)key] = (T)value;
+                _ids.Remove(id);
+            }
         }
 
         /// <inheritdoc />
@@ -130,6 +124,38 @@ namespace RedditSharp.Modmail
             _entities.ToArray().CopyTo(array, index);
         }
 
+        public int Add(object value)
+        {
+            var x = (T)value;
+            Add(x.Id, x);
+            return _ids.IndexOf(x.Id);
+        }
+
+        public int IndexOf(object value)
+        {
+            var x = (T)value;
+            return _ids.IndexOf(x.Id);
+        }
+
+        public void Insert(int index, object value)
+        {
+            var x = (T)value;
+            if (_entities.ContainsKey(x.Id))
+                throw new Exception("Can't add this more than once.");
+
+            _entities.Add(x.Id, x);
+            _ids.Insert(index, x.Id);
+        }
+
+        public void RemoveAt(int index)
+        {
+            if (index >= _ids.Count)
+                return;
+
+            _entities.Remove(_ids[index]);
+            _ids.RemoveAt(index);
+        }
+
         /// <inheritdoc />
         public int Count => _entities.Count;
 
@@ -138,27 +164,71 @@ namespace RedditSharp.Modmail
 
         /// <inheritdoc />
         public bool IsSynchronized { get; }
+
+        public T this[string key]
+        {
+            get => _entities[key];
+            set => Add(key, value);
+        }
+
+        public T this[int index]
+        {
+            get => _entities[_ids[index]];
+            set => Insert(index, value);
+        }
+
+        object IDictionary.this[object key]
+        {
+            get => _entities[(string)key];
+            set => Add(value, (string)key);
+        }
+
+        object IList.this[int index]
+        {
+            get => _entities[_ids[index]];
+            set => Insert(index, value);
+        }
     }
 
     public class ModmailEntityCollectionConverter<T> : Newtonsoft.Json.JsonConverter where T : ModmailObject
     {
         public override bool CanConvert(Type objectType)
         {
-            throw new NotImplementedException();
+            return (
+                objectType == typeof(ModmailObjectCollection<Message>) ||
+                objectType == typeof(ModmailObjectCollection<Conversation>)
+            );
+          //  throw new NotImplementedException();
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var result = new ModmailEntityCollection<T>();
+            Type type = typeof(T);
+
+
+            var result = new ModmailObjectCollection<T>();
+
             var json = JObject.Load(reader);
 
-            if (json.Type == JTokenType.Array)
-            {
-                if (!json.HasValues)
-                    return;
+            if (json.Type != JTokenType.Object)
+                throw new Exception("Unexpected token");
 
-                if ()
+            var xx = json.ToString();
+
+
+            foreach (var item in json.Properties())
+            {
+                var convo = json[item.Name];
+                var obj = JsonSerializer.CreateDefault().Deserialize<T>(convo.CreateReader());
+
+            //    var obj = json[item.Name].ToObject<T>(JsonSerializer.CreateDefault());
+
+                    result[item.Name] = json[item.Name].ToObject<T>();
+
             }
+               
+
+            return result;
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

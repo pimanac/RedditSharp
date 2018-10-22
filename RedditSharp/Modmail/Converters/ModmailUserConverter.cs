@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Modmail.Converters
 {
+#pragma warning disable 1591
     public class ModmailUserConverter : ModmailObjectConverter
     {
         /// <inheritdoc />
@@ -17,11 +18,9 @@ namespace RedditSharp.Modmail.Converters
         /// <inheritdoc />
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var result = new ModmailUser(WebAgent);
-            
-            serializer.Populate(reader, result);
-
             var json = JObject.Load(reader);
+            var result = new ModmailUser(WebAgent, json);
+            serializer.Populate(reader, result);
 
             // get the recent comments collection
             result._recentComments.Urls = json["recentComments"]
@@ -53,6 +52,7 @@ namespace RedditSharp.Modmail.Converters
         {
         }
     }
+#pragma warning restore 1591
 }
 /*
 {
